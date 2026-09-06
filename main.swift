@@ -28,29 +28,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let p = res.appendingPathComponent("launcher.sh").path
             if FileManager.default.fileExists(atPath: p) { return p }
         }
-        // 2) 环境变量显式指定（Xcode scheme 或终端可设，指向任意位置，最通用）
+        // 2) 环境变量 DSH_LAUNCHER_SH（调试场景的唯一入口，指向任意位置的 launcher.sh，
+        //    与源码目录无关，移动/改名仓库文件夹无需改动代码）
         if let env = ProcessInfo.processInfo.environment["DSH_LAUNCHER_SH"],
            FileManager.default.fileExists(atPath: env) {
             return env
         }
-        // 3) 源码目录兜底（本地调试默认布局，变更时改这里即可）
-        let home = NSHomeDirectory()
-        let fallbacks = [
-            "Desktop/source/dsh-launcher-macOS/launcher.sh",
-            "dsh-launcher-macOS/launcher.sh",
-        ]
-        for rel in fallbacks {
-            let p = (home as NSString).appendingPathComponent(rel)
-            if FileManager.default.fileExists(atPath: p) { return p }
-        }
-        return (home as NSString).appendingPathComponent(fallbacks[0])
+        // 3) 未打包且未设置环境变量：无可定位来源，返回空串由调用方提示
+        return ""
     }
 
     // MARK: - 调 launcher.sh(同步,须在后台线程调用)
 
     private func runScript(_ args: [String]) -> String {
+        let script = launcherPath()
+        guard !script.isEmpty else {
+            return "! 未找到 launcher.sh：正式 .app 应包含它；调试运行请设置环境变量 DSH_LAUNCHER_SH 指向 launcher.sh"
+        }
         let p = Process()
-        p.executableURL = URL(fileURLWithPath: launcherPath())
+        p.executableURL = URL(fileURLWithPath: script)
         p.arguments = args
         let pipe = Pipe()
         p.standardOutput = pipe

@@ -68,7 +68,7 @@ launcher.sh disable-plugin @scope/name  从启动清单禁用插件（不重装�
 ## 注意事项
 
 - .app 双击运行是非交互 shell 环境，不读取 `~/.zshrc`。launcher.sh 已内置自动探测逻辑：遍历 nvm 已装版本找到含 dsh 命令的目录并前置到 PATH，不依赖用户 shell 配置。
-- 正式 .app 从包内 `Contents/Resources/launcher.sh` 读取脚本；未打包的调试场景（如 Xcode 直接运行）按以下顺序定位脚本：设置环境变量 `DSH_LAUNCHER_SH` 指向任意位置 → 依次检查 `~/Desktop/source/dsh-launcher-macOS/launcher.sh` 与 `~/dsh-launcher-macOS/launcher.sh` 两个兜底路径。移动源码目录时优先用环境变量，或更新 `main.swift` 中 `launcherPath()` 的兜底数组。
+- 正式 .app 从包内 `Contents/Resources/launcher.sh` 读取脚本。未打包的调试场景（如 Xcode 直接运行）需设置环境变量 `DSH_LAUNCHER_SH` 指向 launcher.sh 所在位置，与源码目录位置无关，移动仓库文件夹无需改动代码。
 - 启动失败时会读取 `~/.dsh/launcher.log` 分析原因，输出「问题插件」与「故障原因」。
 - 禁用插件走市场语义：优先调用 dsh 的 `/dsh-market/toggle` 接口，dsh 未运行时兜底改写本地状态文件（改动前自动备份）。
 - 核心 bundle（`@deepseek-ai/dsh-base`、`@deepseek-ai/dsh-web-app`）在保护名单中，禁止禁用。

@@ -68,7 +68,7 @@ launcher.sh disable-plugin @scope/name   disable a third-party plugin (no reinst
 ## Notes
 
 - Double-clicking the .app runs in a non-interactive shell that does not read `~/.zshrc`. `launcher.sh` handles this itself: it scans installed nvm versions, finds the one exposing the `dsh` command, and prepends it to `PATH`.
-- The shipped .app reads `launcher.sh` from inside the bundle (`Contents/Resources/launcher.sh`). For unpackaged debug runs (e.g. running from Xcode), the script is located in this order: the `DSH_LAUNCHER_SH` environment variable if set → the fallback paths `~/Desktop/source/dsh-launcher-macOS/launcher.sh` and `~/dsh-launcher-macOS/launcher.sh`. When moving the source folder, prefer the environment variable or update the fallback list in `launcherPath()` in `main.swift`.
+- The shipped .app reads `launcher.sh` from inside the bundle (`Contents/Resources/launcher.sh`). For unpackaged debug runs (e.g. running from Xcode), set the `DSH_LAUNCHER_SH` environment variable to point at `launcher.sh`. This is independent of the source folder's location, so moving the repo folder requires no code changes.
 - On startup failure, `~/.dsh/launcher.log` is analyzed and reported as “problem plugins” and “failure reason”.
 - Disabling a plugin follows the market semantics: the `/dsh-market/toggle` API is tried first; if DSH is not running, local state files are patched directly (backed up first).
 - Core bundles (`@deepseek-ai/dsh-base`, `@deepseek-ai/dsh-web-app`) are protected and cannot be disabled.
