@@ -1,5 +1,7 @@
 # DSH Launcher (macOS)
 
+[English](README.en.md)
+
 macOS 桌面图形工具，用于启动、停止、重启、更新 DeepSeek Harness（DSH）web 服务，并可禁用问题插件。所有核心逻辑在 `launcher.sh`。
 
 ## 文件说明
