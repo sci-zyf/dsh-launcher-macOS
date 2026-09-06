@@ -23,11 +23,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - launcher.sh 定位
 
     private func launcherPath() -> String {
+        // 1) .app 包内（正式安装）
         if let res = Bundle.main.resourceURL {
             let p = res.appendingPathComponent("launcher.sh").path
             if FileManager.default.fileExists(atPath: p) { return p }
         }
-        return (NSHomeDirectory() as NSString).appendingPathComponent("dsh-launcher-macOS/launcher.sh")
+        // 2) 环境变量显式指定（Xcode scheme 或终端可设，指向任意位置，最通用）
+        if let env = ProcessInfo.processInfo.environment["DSH_LAUNCHER_SH"],
+           FileManager.default.fileExists(atPath: env) {
+            return env
+        }
+        // 3) 源码目录兜底（本地调试默认布局，变更时改这里即可）
+        let home = NSHomeDirectory()
+        let fallbacks = [
+            "Desktop/source/dsh-launcher-macOS/launcher.sh",
+            "dsh-launcher-macOS/launcher.sh",
+        ]
+        for rel in fallbacks {
+            let p = (home as NSString).appendingPathComponent(rel)
+            if FileManager.default.fileExists(atPath: p) { return p }
+        }
+        return (home as NSString).appendingPathComponent(fallbacks[0])
     }
 
     // MARK: - 调 launcher.sh(同步,须在后台线程调用)
