@@ -8,6 +8,11 @@ SRC_DIR="$(cd "$(dirname "$0")" && pwd)"
 APP="$HOME/Applications/DSH Launcher.app"
 BIN_NAME="DSHLauncher"
 
+# 版本号取自最近 git tag(形如 v1.0.0 → 1.0.0);无 tag 时回退 0.0.0-dev。
+# 发版流程: git tag vX.Y.Z && git push origin vX.Y.Z,再执行本脚本。
+VERSION="$(git -C "$SRC_DIR" describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')"
+[ -n "$VERSION" ] || VERSION="0.0.0-dev"
+
 echo "=== 编译 Swift ==="
 swiftc -O "$SRC_DIR/main.swift" -o /tmp/"$BIN_NAME"
 
@@ -21,7 +26,8 @@ if [ -f "$SRC_DIR/icon.icns" ]; then
     cp "$SRC_DIR/icon.icns" "$APP/Contents/Resources/icon.icns"
 fi
 
-cat > "$APP/Contents/Info.plist" <<'PLIST'
+export VERSION
+cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -33,9 +39,9 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 	<key>CFBundleIdentifier</key>
 	<string>local.dsh.launcher</string>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>$VERSION</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>$VERSION</string>
 	<key>CFBundleExecutable</key>
 	<string>DSHLauncher</string>
 	<key>CFBundleIconFile</key>

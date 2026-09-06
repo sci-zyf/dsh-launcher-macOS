@@ -3,9 +3,23 @@
 # .app 双击是非交互环境,zsh 不读 .zshrc,必须在此显式前置 nvm node 目录,
 # 否则 dsh(shebang 为 #!/usr/bin/env node)会找不到 node 而崩溃。
 
-export PATH="$HOME/.nvm/versions/node/v24.16.0/bin:$PATH"
+# 自动定位装有 dsh CLI 的 node 版本目录:遍历 ~/.nvm/versions/node 下全部已装版本,
+# 从高到低取第一个含 dsh 命令的 bin 目录。找不到时回退写死的默认版本。
+detect_node_dir() {
+  local d
+  for d in $(ls -d "$HOME/.nvm/versions/node/"*/ 2>/dev/null | sort -V -r); do
+    if [ -x "${d}bin/dsh" ]; then
+      echo "${d}bin"
+      return 0
+    fi
+  done
+  return 1
+}
 
-NODE_DIR="$HOME/.nvm/versions/node/v24.16.0/bin"
+NODE_DIR="$(detect_node_dir)"
+[ -n "$NODE_DIR" ] || NODE_DIR="$HOME/.nvm/versions/node/v24.16.0/bin"
+
+export PATH="$NODE_DIR:$PATH"
 DSH="$NODE_DIR/dsh"
 PKG="@deepseek-ai/dsh"
 LOG="$HOME/.dsh/launcher.log"
